@@ -65,11 +65,11 @@ class TransformableMarkersClient(object):
         boxes = self.config['boxes']
         n_boxes = len(boxes)
         cmap = labelcolormap(n_boxes)
-        default_frame_id = rospy.get_param('~default_frame_id', '/map')
+        self.default_frame_id = rospy.get_param('~default_frame_id', '/map')
         for i in xrange(n_boxes):
             box = boxes[i]
             name = box['name']
-            frame_id = box.get('frame_id', default_frame_id)
+            frame_id = box.get('frame_id', self.default_frame_id)
             self.insert_marker(name, frame_id,
                                type=TransformableMarkerOperate.BOX)
             self.set_color(name, (cmap[i][0], cmap[i][1], cmap[i][2], 0.5))
@@ -158,7 +158,8 @@ class TransformableMarkersClient(object):
 
     def _pub_bboxes_callback(self, event):
         bbox_array_msg = BoundingBoxArray()
-        bbox_array_msg.header.frame_id = self.config['boxes'][0]['frame_id']
+        frame_id =  self.config['boxes'][0].get('frame_id', self.default_frame_id)
+        bbox_array_msg.header.frame_id = frame_id
         bbox_array_msg.header.stamp = event.current_real
         for box in self.config['boxes']:
             bbox_msg = BoundingBox()
