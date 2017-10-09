@@ -65,10 +65,11 @@ class TransformableMarkersClient(object):
         boxes = self.config['boxes']
         n_boxes = len(boxes)
         cmap = labelcolormap(n_boxes)
+        default_frame_id = rospy.get_param('~default_frame_id', '/map')
         for i in xrange(n_boxes):
             box = boxes[i]
             name = box['name']
-            frame_id = box.get('frame_id', '/map')
+            frame_id = box.get('frame_id', default_frame_id)
             self.insert_marker(name, frame_id,
                                type=TransformableMarkerOperate.BOX)
             self.set_color(name, (cmap[i][0], cmap[i][1], cmap[i][2], 0.5))
@@ -76,7 +77,7 @@ class TransformableMarkersClient(object):
             self.set_dimensions(name, dim)
             pos = box.get('position', [0, 0, 0])
             ori = box.get('orientation', [0, 0, 0, 1])
-            self.set_pose(box['name'], box['frame_id'], pos, ori)
+            self.set_pose(box['name'], frame_id, pos, ori)
             self.object_poses[box['name']] = Pose(
                 position=Vector3(*pos),
                 orientation=Quaternion(*ori),
