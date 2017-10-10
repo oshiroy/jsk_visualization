@@ -8,6 +8,7 @@ TransformableInteractiveServer::TransformableInteractiveServer():n_(new ros::Nod
   n_->param("torus_udiv", torus_udiv_, 20);
   n_->param("torus_vdiv", torus_vdiv_, 20);
   n_->param("strict_tf", strict_tf_, false);
+  n_->param("publish_all_tf", publish_all_tf_, false);
   tf_listener_.reset(new tf::TransformListener);
   setpose_sub_ = n_->subscribe<geometry_msgs::PoseStamped>("set_pose", 1, boost::bind(&TransformableInteractiveServer::setPose, this, _1, false));
   setcontrolpose_sub_ = n_->subscribe<geometry_msgs::PoseStamped>("set_control_pose", 1, boost::bind(&TransformableInteractiveServer::setPose, this, _1, true));
@@ -675,9 +676,16 @@ void TransformableInteractiveServer::eraseFocusObject()
 
 void TransformableInteractiveServer::tfTimerCallback(const ros::TimerEvent&)
 {
-  if (transformable_objects_map_.find(focus_object_marker_name_) == transformable_objects_map_.end()) { return; }
-  TransformableObject* tobject = transformable_objects_map_[focus_object_marker_name_];
-  tobject->publishTF();
+  if (publish_all_tf_) {
+    for (std::map<string, TransformableObject* >::iterator itpairstri = transformable_objects_map_.begin(); itpairstri != transformable_objects_map_.end(); itpairstri++){
+      TransformableObject* tobject = transformable_objects_map_[itpairstri->first];
+      tobject->publishTF();
+    }
+  } else {
+    if (transformable_objects_map_.find(focus_object_marker_name_) == transformable_objects_map_.end()) { return; }
+    TransformableObject* tobject = transformable_objects_map_[focus_object_marker_name_];
+    tobject->publishTF();
+  }
 }
 
 bool TransformableInteractiveServer::setPoseWithTfTransformation(TransformableObject* tobject, geometry_msgs::PoseStamped pose_stamped, bool for_interactive_control)

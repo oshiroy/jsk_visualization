@@ -152,6 +152,7 @@ namespace jsk_interactive_marker
     bool display_interactive_manipulator_only_selected_;
     bool display_description_only_selected_;
     bool strict_tf_;
+    bool publish_all_tf_;
     int interactive_manipulator_orientation_;
     ros::Timer tf_timer;
     boost::shared_ptr <YamlMenuHandler> yaml_menu_handler_ptr_;
